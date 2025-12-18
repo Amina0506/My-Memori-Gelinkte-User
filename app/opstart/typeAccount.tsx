@@ -46,7 +46,7 @@ export default function TypeAccount() {
        <TouchableOpacity onPress={() => router.push('/GelinkteUser/dagboek/test')}>
         <Text style={styles.Links}>Ga naar dagboek </Text>
       </TouchableOpacity>
-    <TouchableOpacity onPress={() => router.push('/GelinkteUser/handleidingen/test')}>
+    <TouchableOpacity onPress={() => router.push('/GelinkteUser/handleidingen/alleHandleidingen')}>
         <Text style={styles.Links}>Ga naar handleidingen</Text>
       </TouchableOpacity>
 
