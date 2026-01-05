@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -86,9 +85,7 @@ const Handleiding = () => {
             {handleidingen.map((item, index) => (
                 <View key={index} style={styles.titleContainer}>
                     <Text style={styles.title}>{item.handleidingnaam}</Text>
-                    <TouchableOpacity onPress={() => router.push("/GelinkteUser/handleidingen/handleidingBewerken")}>
-                        <Text style={styles.bewerkKnop}>Bewerken</Text>
-                    </TouchableOpacity>
+                    
                 </View>
             ))}
 
