@@ -86,12 +86,6 @@ const Handleiding = () => {
                     >
                         <View style={styles.stapLinks}>
                             <Text style={styles.stapTitel}>Stap {stap.stapnummer}</Text>
-                            
-                            <TextInput
-                                style={styles.input}
-                                value={String(stap.stapnummer)}
-                                onChangeText={text => updateStap(index, 'stapnummer', parseInt(text) || 0)}
-                            />
 
                             <TextInput
                                 style={[styles.input, { height: 80 }]}
