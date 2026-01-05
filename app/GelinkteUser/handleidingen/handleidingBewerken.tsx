@@ -85,7 +85,6 @@ const Handleiding = () => {
             {handleidingen.map((item, index) => (
                 <View key={index} style={styles.titleContainer}>
                     <Text style={styles.title}>{item.handleidingnaam}</Text>
-                    
                 </View>
             ))}
 
