@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -44,7 +43,7 @@ const Handleiding = () => {
         try {
             //stappen opslaan
             const stappenResponse = await fetch('http://10.2.160.216:8000/user/handleiding/stappen/1', {
-                method: 'PUT', 
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(stappen),
             });
@@ -67,14 +66,25 @@ const Handleiding = () => {
         }
     };
 
+    //Stap verwijderen
+    const deleteStap = (index: number) => {
+        const nieuweStappen = stappen
+            //houd alles behalve het element die we niet gebruiken
+            .filter((_, i) => i !== index)
+            //stappen blijven juist genummerd
+            .map((stap, i) => ({
+                ...stap,
+                stapnummer: i + 1,
+            }));
+
+        setStappen(nieuweStappen);
+    };
+
     return (
         <View style={styles.container}>
             {handleidingen.map((item, index) => (
                 <View key={index} style={styles.titleContainer}>
                     <Text style={styles.title}>{item.handleidingnaam}</Text>
-                    <TouchableOpacity onPress={() => router.push("/GelinkteUser/handleidingen/handleidingBewerken")}>
-                        <Text style={styles.bewerkKnop}>Bewerken</Text>
-                    </TouchableOpacity>
                 </View>
             ))}
 
@@ -85,13 +95,14 @@ const Handleiding = () => {
                         style={styles.stap}
                     >
                         <View style={styles.stapLinks}>
-                            <Text style={styles.stapTitel}>Stap {stap.stapnummer}</Text>
-                            
-                            <TextInput
-                                style={styles.input}
-                                value={String(stap.stapnummer)}
-                                onChangeText={text => updateStap(index, 'stapnummer', parseInt(text) || 0)}
-                            />
+                            <View style={styles.stapHeader}>
+                                <Text style={styles.stapTitel}>Stap {stap.stapnummer}</Text>
+
+                                <TouchableOpacity onPress={() => deleteStap(index)}>
+                                    <Text style={styles.verwijderStap}>Verwijder stap</Text>
+                                </TouchableOpacity>
+                            </View>
+
 
                             <TextInput
                                 style={[styles.input, { height: 80 }]}
@@ -99,8 +110,6 @@ const Handleiding = () => {
                                 multiline
                                 onChangeText={text => updateStap(index, 'stapBeschrijving', text)}
                             />
-
-                        
                         </View>
                     </View>
                 ))}
@@ -184,6 +193,22 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
     },
+    stapHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 10,
+    },
+    verwijderStap: {
+        fontWeight: "600",
+        marginBottom: 10,
+        backgroundColor: "#C62828",
+        color: "#fff",
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+    },
+
 });
 
 export default Handleiding;

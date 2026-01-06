@@ -28,6 +28,20 @@ const VoegStap = () => {
         setNieuweBeschrijving("");
     };
 
+    //Stap verwijderen
+    const deleteStap = (index: number) => {
+        const nieuweStappen = stappen
+            //houd alles behalve het element die we niet gebruiken
+            .filter((_, i) => i !== index)
+            //stappen blijven juist genummerd
+            .map((stap, i) => ({
+                ...stap,
+                stapnummer: i + 1,
+            }));
+
+        setStappen(nieuweStappen);
+    };
+
     return (
         <View style={styles.container}>
             <ScrollView contentContainerStyle={{ paddingBottom: 220 }}>
@@ -37,9 +51,15 @@ const VoegStap = () => {
 
                 <Text style={styles.handleidingTitel}>{handleidingnaam}</Text>
 
-                {stappen.map(stap => (
+                {stappen.map((stap, index) => (
                     <View key={stap.stapnummer} style={styles.stappenContainer}>
-                        <Text style={styles.stap}>Stap {stap.stapnummer}</Text>
+                        <View style={styles.stapHeader}>
+                            <Text style={styles.stap}>Stap {stap.stapnummer}</Text>
+
+                            <TouchableOpacity onPress={() => deleteStap(index)}>
+                                <Text style={styles.verwijderStap}>Verwijder stap</Text>
+                            </TouchableOpacity>
+                        </View>
                         <Text style={styles.beschrijving}>{stap.stapBeschrijving}</Text>
 
                         {stap.foto ? (
@@ -155,6 +175,21 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: '600',
         fontSize: 16,
+    },
+    stapHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 10,
+    },
+    verwijderStap: {
+        fontWeight: "600",
+        marginBottom: 10,
+        backgroundColor: "#C62828",
+        color: "#fff",
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 6,
     },
 });
 
