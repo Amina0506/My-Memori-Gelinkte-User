@@ -33,13 +33,18 @@ export default function TypeAccount() {
 <View style={styles.container}>
      
  
-      <TouchableOpacity onPress={() => router.push('/GelinkteUser/accountLinken/home')}>
+      <TouchableOpacity onPress={() => router.push('/GelinkteUser/home')}>
         <Text style={styles.Links}>Ga naar home gelinkte</Text>
       </TouchableOpacity>
 
-           <TouchableOpacity onPress={() => router.push('/GelinkteUser/homeGelinkt')}>
+           <TouchableOpacity onPress={() => router.push('/GelinkteUser/accountLinken')}>
         <Text style={styles.Links}>Ga naar home</Text>
       </TouchableOpacity>
+
+       <TouchableOpacity onPress={() => router.push('/GelinkteUser/beheren')}>
+        <Text style={styles.Links}>Ga naar account beheren</Text>
+      </TouchableOpacity>
+
 <TouchableOpacity onPress={() => router.push('/GelinkteUser/profiel/test')}>
         <Text style={styles.Links}>Ga naar profiel</Text>
       </TouchableOpacity>
@@ -50,7 +55,7 @@ export default function TypeAccount() {
         <Text style={styles.Links}>Ga naar handleidingen</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => router.push('/GelinkteUser/kalender/test')}>
+      <TouchableOpacity onPress={() => router.push('/GelinkteUser/kalender')}>
         <Text style={styles.Links}>Ga naar kalender</Text>
       </TouchableOpacity>
 
