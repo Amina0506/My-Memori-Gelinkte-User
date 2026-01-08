@@ -115,7 +115,7 @@ export default function AfspraakToevoegen() {
  
       <TextInput
         style={[styles.input, styles.textarea]}
-        placeholder="Extra info"
+        placeholder="Benodigdheden"
         value={extra}
         onChangeText={setExtra}
         multiline
