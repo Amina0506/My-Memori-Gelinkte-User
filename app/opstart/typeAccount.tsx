@@ -1,130 +1,60 @@
-import { router } from 'expo-router';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { router } from "expo-router";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function TypeAccount() {
-    return (
-        <View style={styles.container}>
-            {/* Titelbalk */}
-            <View style={styles.header}>
-                <Text style={styles.headerText}>My Memori</Text>
-            </View>
+  return (
+    <View style={styles.screen}>
+      <View style={styles.card}>
+        <Text style={styles.title}>Welkom</Text>
+        <Text style={styles.subtitle}>Gelinkte gebruiker</Text>
 
-            {/* Inhoud */}
-            <View style={styles.inner}>
-                <Text style={styles.title}>Type account</Text>
+        <TouchableOpacity
+          style={styles.primaryBtn}
+          onPress={() => router.push("/opstart/profielAanmaken" as any)}
+          activeOpacity={0.9}
+        >
+          <Text style={styles.primaryBtnText}>Profiel aanmaken</Text>
+        </TouchableOpacity>
 
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => router.push('/opstart/taalKeuze')}
-                >
-                    <Text style={styles.buttonText}>Ik ben de persoon met dementie</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => router.push('/')}
-                >
-                    <Text style={styles.buttonText}>Ik ben een zorgverlener</Text>
-                </TouchableOpacity>
-
-      
-            </View>
-<View style={styles.container}>
-     
- 
-      <TouchableOpacity onPress={() => router.push('/GelinkteUser/home')}>
-        <Text style={styles.Links}>Ga naar home gelinkte</Text>
-      </TouchableOpacity>
-
-           <TouchableOpacity onPress={() => router.push('/GelinkteUser/accountLinken')}>
-        <Text style={styles.Links}>Ga naar home</Text>
-      </TouchableOpacity>
-
-       <TouchableOpacity onPress={() => router.push('/GelinkteUser/beheren')}>
-        <Text style={styles.Links}>Ga naar account beheren</Text>
-      </TouchableOpacity>
-
-<TouchableOpacity onPress={() => router.push('/GelinkteUser/profiel/test')}>
-        <Text style={styles.Links}>Ga naar profiel</Text>
-      </TouchableOpacity>
-       <TouchableOpacity onPress={() => router.push('/GelinkteUser/dagboek/test')}>
-        <Text style={styles.Links}>Ga naar dagboek </Text>
-      </TouchableOpacity>
-    <TouchableOpacity onPress={() => router.push('/GelinkteUser/handleidingen/alleHandleidingen')}>
-        <Text style={styles.Links}>Ga naar handleidingen</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => router.push('/GelinkteUser/kalender')}>
-        <Text style={styles.Links}>Ga naar kalender</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => router.push('/GelinkteUser/stamboom/test')}>
-        <Text style={styles.Links}>Ga naar stamboom</Text>
-      </TouchableOpacity>
-
-       <TouchableOpacity onPress={() => router.push('/GelinkteUser/todoLijst/test')}>
-        <Text style={styles.Links}>Ga naar Todolist</Text>
-      </TouchableOpacity>
-
+        <TouchableOpacity
+          style={styles.secondaryBtn}
+          onPress={() => router.push("/opstart/inloggen" as any)}
+          activeOpacity={0.9}
+        >
+          <Text style={styles.secondaryBtnText}>Inloggen met ID</Text>
+        </TouchableOpacity>
+      </View>
     </View>
-
-        </View>
-    );
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#ffffffff',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-    },
-
-    header: {
-        width: '100%',
-        paddingVertical: 18,
-        backgroundColor: '#D3C4F3',
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    headerText: {
-        color: '#3A276A',
-        fontSize: 30,
-        fontWeight: '600',
-    },
-
-    inner: {
-        width: '80%',
-        paddingVertical: 30,
-        borderRadius: 8,
-        alignItems: 'center',
-    },
-    title: {
-        fontSize: 28,
-        color: '#3A276A',
-        marginBottom: 30,
-        fontWeight: '600',
-    },
-
-    button: {
-        backgroundColor: '#8757D8',
-        paddingVertical: 14,
-        paddingHorizontal: 20,
-        width: '80%',
-        borderRadius: 10,
-        marginBottom: 15,
-    },
-    buttonText: {
-        color: 'white',
-        textAlign: 'center',
-        fontSize: 20,
-        fontWeight: '600',
-    },
-Links: {
-  color: '#1E90FF',      // blauw zoals een echte link
-  fontSize: 16,
-  textDecorationLine: 'underline',
-  marginTop: 10,
-},
+  screen: { flex: 1, justifyContent: "center", padding: 18, backgroundColor: "#F4F3EF" },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 18,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: "#E6E3DB",
+  },
+  title: { fontSize: 22, fontWeight: "900", textAlign: "center", color: "#3B2A63" },
+  subtitle: { marginTop: 6, textAlign: "center", color: "#555", fontWeight: "700" },
+  primaryBtn: {
+    marginTop: 18,
+    backgroundColor: "rgba(45, 27, 78, 1)",
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+  primaryBtnText: { color: "#fff", fontWeight: "800", fontSize: 15 },
+  secondaryBtn: {
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: "#3B2A63",
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+  },
+  secondaryBtnText: { color: "#3B2A63)", fontWeight: "800", fontSize: 15 },
 });
