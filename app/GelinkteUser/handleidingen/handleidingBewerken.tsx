@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useLocalSearchParams } from "expo-router";
+import React, { useEffect, useMemo, useState } from "react";
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 interface HandleidingType {
     handleidingnaam: string;
@@ -9,142 +10,212 @@ interface HandleidingType {
 }
 
 interface Stappen {
+    handleidingstapId: number;
     stapnummer: number;
-    stapBeschrijving: string;
+    beschrijving: string;
     foto: string;
 }
 
 const Handleiding = () => {
-    const scrollRef = useRef<ScrollView | null>(null);
-    const [handleidingen, setHandleidingen] = useState<HandleidingType[]>([]);
+    const [handleiding, setHandleiding] = useState<HandleidingType | null>(null);
     const [stappen, setStappen] = useState<Stappen[]>([]);
+    const { id } = useLocalSearchParams<{ id: string }>();
+    const { handleidingnaam } = useLocalSearchParams<{ handleidingnaam: string }>();
+
+    const baseUrl = useMemo(() => "http://10.2.160.216:8000", []);
 
     useEffect(() => {
-        //handleidingen
-        fetch("http://10.2.160.216:8000/user/handleiding/3")
-            .then(res => res.json())
-            .then((data: HandleidingType[]) => setHandleidingen(data))
-            .catch(err => console.error(err));
+        if (!id) return;
 
-        //stappen
-        fetch("http://10.2.160.216:8000/user/handleiding/stappen/1")
-            .then(res => res.json())
+        if (!handleidingnaam)
+
+            // handleiding ophalen
+            fetch(`${baseUrl}/handleiding/${id}`)
+                .then((res) => res.json())
+                .then((data: HandleidingType) => setHandleiding(data))
+                .catch((err) => console.error(err));
+
+        // stappen ophalen
+        fetch(`${baseUrl}/handleiding/stappen/${id}`)
+            .then((res) => res.json())
             .then((data: Stappen[]) => setStappen(data))
-            .catch(err => console.error(err));
-    }, []);
+            .catch((err) => console.error(err));
+    }, [id, baseUrl]);
 
-    const updateStap = (index: number, field: keyof Stappen, value: string | number) => {
-        const newStappen = [...stappen];
-        newStappen[index] = { ...newStappen[index], [field]: value };
-        setStappen(newStappen);
+
+    const updateStap = (
+        index: number,
+        field: keyof Stappen,
+        value: string | number
+    ) => {
+        setStappen((prev) => {
+            const copy = [...prev];
+            copy[index] = { ...copy[index], [field]: value } as Stappen;
+            return copy;
+        });
     };
 
-    const saveChanges = async () => {
+    const addStap = () => {
+        setStappen((prev) => {
+            const maxNum = prev.reduce((m, s) => Math.max(m, s.stapnummer || 0), 0);
+            const nextNum = maxNum + 1;
+
+            const newStap: Stappen = {
+                handleidingstapId: 0,
+                stapnummer: nextNum,
+                beschrijving: "",
+                foto: "",
+            };
+
+            fetch("http://10.2.160.216:8000/handleiding/stappen", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    handleidingId: id,
+                    handleidingstapId: 0,
+                    stapnummer: nextNum,
+                    beschrijving: " ",
+                    foto: "",
+                }),
+            });
+
+
+            return [...prev, newStap];
+        });
+    };
+
+    const saveChanges = async (stap: Stappen) => {
         try {
-            //stappen opslaan
-            const stappenResponse = await fetch('http://10.2.160.216:8000/user/handleiding/stappen/1', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(stappen),
-            });
-            const updatedStappen: Stappen[] = await stappenResponse.json();
-            setStappen(updatedStappen);
+            if (!id) return;
 
-            //handleiding opslaan
-            const handleidingResponse = await fetch('http://10.2.160.216:8000/user/handleiding/3', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(handleidingen),
+            const stappenResponse = await fetch(`${baseUrl}/handleiding/stap/${stap.handleidingstapId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(stap),
             });
-            const updatedHandleiding: HandleidingType[] = await handleidingResponse.json();
-            setHandleidingen(updatedHandleiding);
+            if (!stappenResponse.ok) {
+                const txt = await stappenResponse.text().catch(() => "");
+                throw new Error(`Stappen PATCH mislukt: ${stappenResponse.status} ${txt}`);
+            }
 
-            Alert.alert('Succes', 'De wijzigingen zijn opgeslagen!');
+            fetch(`${baseUrl}/handleiding/stappen/${id}`)
+                .then((res) => res.json())
+                .then((data: Stappen[]) => setStappen(data))
+                .catch((err) => console.error(err));
+
+            // handleiding opslaan
+            if (handleiding) {
+                const handleidingResponse = await fetch(`${baseUrl}/handleiding/stappen/${id}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(handleiding),
+                });
+
+                if (!handleidingResponse.ok) {
+                    const txt = await handleidingResponse.text().catch(() => "");
+                    throw new Error(`Handleiding PATCH mislukt: ${handleidingResponse.status} ${txt}`);
+                }
+
+                const updatedHandleiding: HandleidingType = await handleidingResponse.json();
+                setHandleiding(updatedHandleiding);
+            }
+
+            Alert.alert("Succes", "De wijzigingen zijn opgeslagen!");
         } catch (error) {
             console.error(error);
-            Alert.alert('Fout', 'Er is iets misgegaan bij het opslaan.');
+            Alert.alert("Fout", "Er is iets misgegaan bij het opslaan.");
         }
     };
 
-    //Stap verwijderen
-    const deleteStap = (index: number) => {
-        const nieuweStappen = stappen
-            //houd alles behalve het element die we niet gebruiken
-            .filter((_, i) => i !== index)
-            //stappen blijven juist genummerd
-            .map((stap, i) => ({
-                ...stap,
-                stapnummer: i + 1,
-            }));
+    const deleteStap = async (handleidingstapId: number) => {
+        try {
+            // interface wordt geupdatet
+            setStappen((prev) => prev.filter((s) => s.handleidingstapId !== handleidingstapId));
 
-        setStappen(nieuweStappen);
+            if (!handleidingstapId || handleidingstapId === 0) return;
+
+            const res = await fetch(`${baseUrl}/handleiding/stap/${handleidingstapId}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (!res.ok) {
+                const txt = await res.text().catch(() => "");
+                throw new Error(`DELETE mislukt: ${res.status} ${txt}`);
+            }
+        } catch (e) {
+            console.error(e);
+            Alert.alert("Fout", "Verwijderen is mislukt.");
+        }
     };
 
     return (
         <View style={styles.container}>
-            {handleidingen.map((item, index) => (
-                <View key={index} style={styles.titleContainer}>
-                    <Text style={styles.title}>{item.handleidingnaam}</Text>
-                </View>
-            ))}
+            <ScrollView style={styles.scroll}>
 
-            <ScrollView ref={scrollRef} style={styles.scroll}>
+
+                <View style={styles.titleContainer}>
+                    <Text style={styles.title}>{handleidingnaam}</Text>
+                </View>
+
+
                 {stappen.map((stap, index) => (
-                    <View
-                        key={index}
-                        style={styles.stap}
-                    >
+                    <View key={`${stap.handleidingstapId}-${index}`} style={styles.stap}>
                         <View style={styles.stapLinks}>
                             <View style={styles.stapHeader}>
                                 <Text style={styles.stapTitel}>Stap {stap.stapnummer}</Text>
-
-                                <TouchableOpacity onPress={() => deleteStap(index)}>
-                                    <Text style={styles.verwijderStap}>Verwijder stap</Text>
-                                </TouchableOpacity>
                             </View>
-
 
                             <TextInput
                                 style={[styles.input, { height: 80 }]}
-                                value={stap.stapBeschrijving}
+                                value={stap.beschrijving}
                                 multiline
-                                onChangeText={text => updateStap(index, 'stapBeschrijving', text)}
+                                onChangeText={(text) => updateStap(index, "beschrijving", text)}
+                                placeholder="Beschrijf de stap..."
                             />
+
+                            <TouchableOpacity style={styles.saveButton} onPress={() => saveChanges(stap)}>
+                                <Text style={styles.saveButtonText}>Opslaan</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity style={styles.verwijderStap} onPress={() => deleteStap(stap.handleidingstapId)}>
+                                <Text style={styles.verwijderStapText}>Verwijder stap</Text>
+                            </TouchableOpacity>
                         </View>
                     </View>
                 ))}
             </ScrollView>
 
-            <TouchableOpacity style={styles.saveButton} onPress={saveChanges}>
-                <Text style={styles.saveButtonText}>Opslaan</Text>
+            {/*knop om stap toe te voegen*/}
+            <TouchableOpacity style={styles.addButton} onPress={addStap}>
+                <Text style={styles.addButtonText}>Stap toevoegen</Text>
             </TouchableOpacity>
         </View>
-    )
-}
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
+        backgroundColor: "#fff",
+        alignItems: "center",
         paddingBottom: 20,
     },
     title: {
         fontSize: 28,
-        color: '#000',
+        color: "#000",
         marginBottom: 30,
         marginTop: 30,
-        fontWeight: '600',
-        alignSelf: 'flex-start',
-        paddingLeft: 30,
+        fontWeight: "600",
+        alignSelf: "flex-start",
     },
     stap: {
-        borderColor: '#D9D9D9',
+        borderColor: "#D9D9D9",
         borderWidth: 2,
         borderRadius: 6,
-        backgroundColor: '#D9D9D9',
+        backgroundColor: "#D9D9D9",
         padding: 14,
-        width: '100%',
+        width: "100%",
         marginBottom: 15,
     },
     stapLinks: {
@@ -152,46 +223,45 @@ const styles = StyleSheet.create({
     },
     stapTitel: {
         fontSize: 22,
-        color: '#000',
-        fontWeight: '600',
+        color: "#000",
+        fontWeight: "600",
         marginBottom: 10,
     },
     input: {
-        backgroundColor: '#fff',
+        backgroundColor: "#fff",
         borderWidth: 1,
-        borderColor: '#ccc',
+        borderColor: "#ccc",
         borderRadius: 6,
         padding: 10,
         marginBottom: 10,
         fontSize: 15,
     },
     scroll: {
-        width: '90%',
+        width: "90%",
         marginBottom: 20,
+        marginTop: 50
     },
     titleContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        width: '100%',
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        width: "100%",
         paddingHorizontal: 30,
     },
-    bewerkKnop: {
-        fontSize: 16,
-        color: '#3A276A',
-        fontWeight: '600',
-    },
     saveButton: {
-        backgroundColor: '#3A276A',
-        paddingVertical: 15,
-        paddingHorizontal: 40,
-        borderRadius: 8,
-        marginTop: 10,
+        backgroundColor: "#3A276A",
+        fontWeight: "600",
+        marginBottom: 10,
+        color: "#fff",
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 6,
     },
     saveButtonText: {
-        color: '#fff',
+        color: "#fff",
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: "600",
+        alignSelf: 'center'
     },
     stapHeader: {
         flexDirection: "row",
@@ -200,15 +270,35 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     verwijderStap: {
-        fontWeight: "600",
         marginBottom: 10,
         backgroundColor: "#C62828",
-        color: "#fff",
         paddingVertical: 6,
         paddingHorizontal: 12,
         borderRadius: 6,
     },
-
+    verwijderStapText: {
+        alignSelf: 'center',
+        fontWeight: "600",
+        color: "#fff",
+    },
+    addButton: {
+        backgroundColor: "#3A276A",
+        paddingVertical: 15,
+        paddingHorizontal: 40,
+        borderRadius: 8,
+        marginTop: 10,
+    },
+    addButtonText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "600",
+    },
+    buttonContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: "90%",
+        paddingHorizontal: 10,
+    }
 });
 
 export default Handleiding;

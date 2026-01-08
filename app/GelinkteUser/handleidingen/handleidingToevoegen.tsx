@@ -4,16 +4,41 @@ import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "reac
 
 const HandleidingToevoegen = () => {
     const [handleidingnaam, setHandleidingnaam] = useState("");
+    const [handleidingbeschrijving, setHandleidingbeschrijving] = useState("");
     const [foto] = useState<string | null>(null);
+
+    const maakHandleiding = () => {
+        fetch("http://10.2.160.216:8000/handleiding", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                gebruikersId: 3,
+                handleidingnaam,
+                handleidingbeschrijving,
+                gepint: 0
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data)
+                router.push({
+                    pathname: "/GelinkteUser/handleidingen/voegStap",
+                    params: {
+                        handleidingId: data.HandleidingId,
+                        handleidingnaam: handleidingnaam
+                    }
+                });
+            });
+    };
 
     return (
         <View style={styles.container}>
-
             <View style={styles.titleWrapper}>
                 <Text style={styles.title}>Handleiding</Text>
             </View>
 
-            {/**foto toevoegen */}
             <TouchableOpacity style={styles.fotoBox}>
                 {foto ? (
                     <Image source={{ uri: foto }} style={styles.foto} />
@@ -29,22 +54,23 @@ const HandleidingToevoegen = () => {
                 onChangeText={setHandleidingnaam}
             />
 
+            <TextInput
+                style={styles.input}
+                placeholder="Beschrijving van de handleiding"
+                value={handleidingbeschrijving}
+                onChangeText={setHandleidingbeschrijving}
+            />
+
             <TouchableOpacity
                 style={[
                     styles.button,
-                    !handleidingnaam && styles.buttonDisabled,
+                    (!handleidingnaam || !handleidingbeschrijving) && styles.buttonDisabled,
                 ]}
-                onPress={() =>
-                    router.push({
-                        pathname: "/GelinkteUser/handleidingen/voegStap",
-                        params: { handleidingnaam },
-                    })
-                }
-                disabled={!handleidingnaam}
+                onPress={maakHandleiding}
+                disabled={!handleidingnaam || !handleidingbeschrijving}
             >
-                <Text style={styles.buttonText}>Handleiding toevoegen</Text>
+                <Text style={styles.buttonText}>Voeg handleiding toe</Text>
             </TouchableOpacity>
-
         </View>
     );
 };
@@ -97,7 +123,6 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 25,
         marginHorizontal: 20,
-
     },
     button: {
         borderWidth: 2,

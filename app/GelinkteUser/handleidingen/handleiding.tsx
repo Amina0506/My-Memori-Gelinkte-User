@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -10,41 +10,46 @@ interface HandleidingType {
 }
 interface StapType {
     stapnummer: number;
-    stapBeschrijving: string;
+    beschrijving: string;
     foto: string;
 }
 
 const Handleiding = () => {
     const scrollRef = useRef<ScrollView | null>(null);
-    const [handleidingen, setHandleidingen] = useState<HandleidingType[]>([]);
+    const [handleiding, setHandleiding] = useState<HandleidingType | null>(null);
     const [stappen, setStappen] = useState<StapType[]>([]);
+    const router = useRouter();
+    const { id } = useLocalSearchParams<{ id: string }>();
+    const { handleidingnaam } = useLocalSearchParams<{ handleidingnaam: string }>();
 
     //data ophalen
     useEffect(() => {
         //handleidingen
-        fetch("http://10.2.160.216:8000/user/handleiding/3")
+        fetch(`http://10.2.160.216:8000/handleiding/${id}`)
             .then(res => res.json())
-            .then((data: HandleidingType[]) => setHandleidingen(data))
+            .then((data: HandleidingType) => setHandleiding(data))
             .catch(err => console.error(err));
 
         //stappen
-        fetch("http://10.2.160.216:8000/user/handleiding/stappen/1")
+        fetch(`http://10.2.160.216:8000/handleiding/stappen/${id}`)
             .then(res => res.json())
-            .then((data: StapType[]) => setStappen(data))
+            .then((data: StapType[]) => setStappen(data)).then(data => console.log(data))
             .catch(err => console.error(err));
     }, []);
 
     return (
         <View style={styles.container}>
             {/**header met titel van de handleiding en 'bewerken' knop */}
-            {handleidingen.map((item, index) => (
-                <View key={index} style={styles.titleContainer}>
-                    <Text style={styles.title}>{item.handleidingnaam}</Text>
-                    <TouchableOpacity onPress={() => router.push("/GelinkteUser/handleidingen/handleidingBewerken")}>
+            {handleiding && (
+                <View style={styles.titleContainer}>
+                    <Text style={styles.title}>{handleidingnaam}</Text>
+
+                    <TouchableOpacity onPress={() => router.push(`/GelinkteUser/handleidingen/handleidingBewerken?id=${id}&handleidingnaam=${handleidingnaam}`)}>
                         <Text style={styles.bewerkKnop}>Bewerken</Text>
                     </TouchableOpacity>
                 </View>
-            ))}
+            )}
+
 
             {/**kaarten met stappen */}
             <ScrollView ref={scrollRef} style={styles.scroll} >
@@ -52,7 +57,7 @@ const Handleiding = () => {
                     <View key={index} style={styles.stap}>
                         <View style={styles.stapLinks}>
                             <Text style={styles.stapTitel}>Stap {stap.stapnummer}</Text>
-                            <Text style={styles.stapDescription}>{stap.stapBeschrijving}</Text>
+                            <Text style={styles.stapDescription}>{stap.beschrijving}</Text>
                         </View>
                     </View>
                 ))}
@@ -74,7 +79,6 @@ const styles = StyleSheet.create({
         marginTop: 30,
         fontWeight: '600',
         alignSelf: 'flex-start',
-        paddingLeft: 30,
     },
     stap: {
         borderColor: '#D9D9D9',
@@ -100,7 +104,7 @@ const styles = StyleSheet.create({
         paddingRight: 15,
     },
     scroll: {
-        width: '90%'
+        width: '90%',
     },
     titleContainer: {
         flexDirection: 'row',

@@ -1,8 +1,9 @@
 import { router } from "expo-router";
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type Handleiding = {
+    handleidingid: number;
     handleidingnaam: string;
     handleidingbeschrijving: string;
     foto: string;
@@ -13,7 +14,7 @@ function AlleHandleidingen() {
     const [handleidingen, setHandleidingen] = useState<Handleiding[]>([]);
 
     useEffect(() => {
-        fetch("http://10.2.160.216:8000/user/handleiding/3")
+        fetch("http://10.2.160.216:8000/handleiding/1")
             .then(res => res.json())
             .then(data => {
                 console.log(data);
@@ -22,22 +23,24 @@ function AlleHandleidingen() {
             .catch(err => console.error("Fetch error:", err));
     }, []);
 
-
     return (
         <View style={styles.container}>
-
             <Text style={styles.title}>Handleidingen</Text>
-            <View style={styles.lijst}>
-                {handleidingen.map((item, index) => (
+            <ScrollView style={styles.scrollContainer}>
+                <View style={styles.lijst}>
+                    {handleidingen.map((item) => (
                         <TouchableOpacity
-                            key={index}
+                            key={item.handleidingid}
                             style={styles.images}
-                            onPress={() => router.push(`/GelinkteUser/handleidingen/handleiding`)}>
+                            onPress={() => router.push(`/GelinkteUser/handleidingen/handleiding?id=${item.handleidingid}&handleidingnaam=${item.handleidingnaam}`)}
+                        >
                             <Text>{item.handleidingnaam}</Text>
                             <Text>{item.handleidingbeschrijving}</Text>
                         </TouchableOpacity>
+
                     ))}
-            </View>
+                </View>
+            </ScrollView>
 
             <TouchableOpacity
                 style={styles.button}
@@ -45,9 +48,8 @@ function AlleHandleidingen() {
             >
                 <Text style={styles.buttonText}>Voeg handleiding toe</Text>
             </TouchableOpacity>
-
         </View>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -88,18 +90,23 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         borderRadius: 8,
         alignSelf: 'center',
-        marginBottom: 20,
+        marginBottom: 10,
         borderColor: '#301A57',
         borderWidth: 2,
         position: 'absolute',
         bottom: 30,
+        backgroundColor: '#fff'
     },
     buttonText: {
         color: '#000',
         fontSize: 20,
         fontWeight: "600",
     },
-
-})
+    scrollContainer: {
+        flex: 1,
+        width: '100%',
+        marginBottom: 120,
+    },
+});
 
 export default AlleHandleidingen;
