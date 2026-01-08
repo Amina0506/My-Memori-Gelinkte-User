@@ -3,14 +3,15 @@ import { readLinkedSession } from "@/app/utils/sessionLinked";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
+// -------- helpers ----------
 function deepFindString(obj: any, keys: string[]): string | null {
   if (obj == null) return null;
 
@@ -39,10 +40,7 @@ function deepFindString(obj: any, keys: string[]): string | null {
 }
 
 function extractName(payload: any): string {
-  return (
-    deepFindString(payload, ["gebruikersnaam", "naam", "name", "username"]) ||
-    "Onbekend"
-  );
+  return deepFindString(payload, ["gebruikersnaam", "naam", "name", "username"]) || "Onbekend";
 }
 
 function toInt(v: any): number | null {
@@ -50,17 +48,14 @@ function toInt(v: any): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+// connected/dement response kan verschillen; we check zowel dementgebruikerId als dementegebruikerId
 function extractDementRowInfo(row: any): {
   dementgebruikerId: number | null;
   gebruikerId: number | null;
   name: string;
 } {
-  const dementgebruikerId = toInt(
-    row?.dementgebruikerId ?? row?.dementegebruikerId
-  );
-  const gebruikerId = toInt(
-    row?.gebruikerId ?? row?.gebruikerid ?? row?.tblgebruikers_gebruikerId
-  );
+  const dementgebruikerId = toInt(row?.dementgebruikerId ?? row?.dementegebruikerId);
+  const gebruikerId = toInt(row?.gebruikerId ?? row?.gebruikerid ?? row?.tblgebruikers_gebruikerId);
   const name = extractName(row);
   return { dementgebruikerId, gebruikerId, name };
 }
@@ -79,6 +74,7 @@ type Counts = {
   afspraken: number;
   todoLists: number;
   familieBladen: number;
+  handleidingen: number;
 };
 
 export default function HomeGelinkteGebruiker() {
@@ -89,20 +85,23 @@ export default function HomeGelinkteGebruiker() {
 
   const [linkedNaam, setLinkedNaam] = useState("...");
   const [dementNaam, setDementNaam] = useState("...");
+
   const [counts, setCounts] = useState<Counts>({
     logs: 0,
     afspraken: 0,
     todoLists: 0,
     familieBladen: 0,
+    handleidingen: 0,
   });
 
- 
+  // guard
   useEffect(() => {
     if (!session) {
       router.replace("/opstart/inloggen" as any);
     }
   }, [session]);
 
+  // load + check connection + counts
   useEffect(() => {
     if (!session) return;
 
@@ -110,11 +109,10 @@ export default function HomeGelinkteGebruiker() {
       try {
         setLoading(true);
 
-
-        const resLinked = await fetch(
-          `${BASE_URL}/user/linked/${session.gebruikerid}`,
-          { headers: { Accept: "application/json" } }
-        );
+        // 1) linked user must exist
+        const resLinked = await fetch(`${BASE_URL}/user/linked/${session.gebruikerid}`, {
+          headers: { Accept: "application/json" },
+        });
         if (!resLinked.ok) {
           router.replace("/opstart/inloggen" as any);
           return;
@@ -122,11 +120,10 @@ export default function HomeGelinkteGebruiker() {
         const linkedData = await safeJson(resLinked);
         setLinkedNaam(linkedData ? extractName(linkedData) : "Onbekend");
 
-      
-        const resConnected = await fetch(
-          `${BASE_URL}/user/connected/dement/${session.gebruikerid}`,
-          { headers: { Accept: "application/json" } }
-        );
+        // 2) check: is deze dementgebruikerid effectief gekoppeld aan deze gelinkte gebruiker?
+        const resConnected = await fetch(`${BASE_URL}/user/connected/dement/${session.gebruikerid}`, {
+          headers: { Accept: "application/json" },
+        });
         const connectedList = await safeJson(resConnected);
 
         if (!resConnected.ok || !Array.isArray(connectedList)) {
@@ -151,7 +148,14 @@ export default function HomeGelinkteGebruiker() {
 
         setDementNaam(match.name || "Onbekend");
 
-        const [resLogs, resAfspraken, resTodo, resBoom] = await Promise.all([
+        // 3) counts via Dement_ID endpoints
+        const [
+          resLogs,
+          resAfspraken,
+          resTodo,
+          resBoom,
+          resHandleidingen,
+        ] = await Promise.all([
           fetch(`${BASE_URL}/user/logs/${session.dementgebruikerid}`, {
             headers: { Accept: "application/json" },
           }),
@@ -164,31 +168,35 @@ export default function HomeGelinkteGebruiker() {
           fetch(`${BASE_URL}/user/familieboom/${session.dementgebruikerid}`, {
             headers: { Accept: "application/json" },
           }),
+          // ✅ Handleidingen
+          fetch(`${BASE_URL}/user/handleiding/${session.dementgebruikerid}`, {
+            headers: { Accept: "application/json" },
+          }),
         ]);
 
         const logsData = await safeJson(resLogs);
         const afsprakenData = await safeJson(resAfspraken);
         const todoData = await safeJson(resTodo);
         const boomData = await safeJson(resBoom);
+        const handleidingenData = await safeJson(resHandleidingen);
 
         const logsCount = Array.isArray(logsData) ? logsData.length : 0;
-        const afsprakenCount = Array.isArray(afsprakenData)
-          ? afsprakenData.length
-          : 0;
+        const afsprakenCount = Array.isArray(afsprakenData) ? afsprakenData.length : 0;
         const todoCount = Array.isArray(todoData) ? todoData.length : 0;
 
         let bladenCount = 0;
         if (Array.isArray(boomData)) bladenCount = boomData.length;
-        else if (boomData && Array.isArray(boomData?.bladen))
-          bladenCount = boomData.bladen.length;
-        else if (boomData && Array.isArray(boomData?.familiebladen))
-          bladenCount = boomData.familiebladen.length;
+        else if (boomData && Array.isArray(boomData?.bladen)) bladenCount = boomData.bladen.length;
+        else if (boomData && Array.isArray(boomData?.familiebladen)) bladenCount = boomData.familiebladen.length;
+
+        const handleidingenCount = Array.isArray(handleidingenData) ? handleidingenData.length : 0;
 
         setCounts({
           logs: logsCount,
           afspraken: afsprakenCount,
           todoLists: todoCount,
           familieBladen: bladenCount,
+          handleidingen: handleidingenCount,
         });
       } finally {
         setLoading(false);
@@ -200,7 +208,7 @@ export default function HomeGelinkteGebruiker() {
 
   if (!session) return null;
 
-
+  // routes (pas aan als je binnen folders nog home.tsx gebruikt)
   const pushTo = (pathname: string) =>
     router.push({
       pathname,
@@ -211,10 +219,11 @@ export default function HomeGelinkteGebruiker() {
     } as any);
 
   const goDagboek = () => pushTo("/GelinkteUser/dagboek");
+  const goHandleidingen = () => pushTo("/GelinkteUser/handleidingen/alleHandleidingen");
   const goStamboom = () => pushTo("/GelinkteUser/stamboom");
   const goKalender = () => pushTo("/GelinkteUser/kalender");
   const goWieBenIk = () => pushTo("/GelinkteUser/profiel");
-  const goNoodcontacten = () => pushTo("/GelinkteUser/beheren");
+  const goNoodcontacten = () => pushTo("/GelinkteUser/noodcontacten");
   const goTodo = () => pushTo("/GelinkteUser/todoLijst");
 
   return (
@@ -243,6 +252,7 @@ export default function HomeGelinkteGebruiker() {
 
       <View style={styles.grid}>
         <Tile title="Dagboek" subtitle={`${counts.logs} logs`} onPress={goDagboek} />
+        <Tile title="Handleidingen" subtitle={`${counts.handleidingen} handleidingen`} onPress={goHandleidingen} />
         <Tile title="Stamboom" subtitle={`${counts.familieBladen} personen`} onPress={goStamboom} />
         <Tile title="Kalender" subtitle={`${counts.afspraken} afspraken`} onPress={goKalender} />
         <Tile title="Wie ben ik" subtitle="Profiel bekijken" onPress={goWieBenIk} />
@@ -250,7 +260,7 @@ export default function HomeGelinkteGebruiker() {
         <Tile title="To-do lijst" subtitle={`${counts.todoLists} lijsten`} onPress={goTodo} />
       </View>
 
-
+      
     </ScrollView>
   );
 }
