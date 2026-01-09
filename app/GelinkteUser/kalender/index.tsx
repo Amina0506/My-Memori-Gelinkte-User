@@ -42,7 +42,7 @@ export default function KalenderGelinkt() {
     ...Array(firstDay).fill(null),
     ...Array.from({ length: daysInMonth }, (_, i) => i + 1),
   ];
-
+  
   const fetchAfspraken = () => {
     fetch(`http://10.2.160.216:8000/user/afspraken/${session.dementgebruikerid}`)
       .then((res) => res.json())
@@ -93,21 +93,25 @@ export default function KalenderGelinkt() {
         scrollEnabled={false}
         renderItem={({ item }) => {
           if (!item) return <View style={styles.emptyDay} />;
+          const afspraakBestaat = hasAppointment(item);
 
           return (
             <TouchableOpacity
               style={[styles.day, hasAppointment(item) && styles.dayHasAppointment]}
-              onPress={() =>
-                router.push({
-                  pathname: "/GelinkteUser/kalender/toevoegen",
-                  params: {
-                    date: new Date(year, month, item).toISOString(),
-                    dateInput: `${year}-${String(month + 1).padStart(2, "0")}-${String(item).padStart(2, "0")}`,
-                    gebruikerid: String(session.gebruikerid),
-                    dementgebruikerid: String(session.dementgebruikerid),
-                  },
-                })
-              }
+          onPress={() =>
+  router.push({
+    pathname: afspraakBestaat
+      ? "/GelinkteUser/kalender/detaildag"
+      : "/GelinkteUser/kalender/toevoegen",
+    params: {
+      date: new Date(year, month, item).toISOString(),
+      dateInput: `${year}-${String(month + 1).padStart(2, "0")}-${String(item).padStart(2, "0")}`,
+      gebruikerid: String(session.gebruikerid),
+      dementgebruikerid: String(session.dementgebruikerid),
+    },
+  })
+}
+
             >
               <Text style={styles.dayText}>{item}</Text>
             </TouchableOpacity>
