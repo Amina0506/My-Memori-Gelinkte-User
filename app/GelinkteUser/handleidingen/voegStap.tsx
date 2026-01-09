@@ -10,12 +10,15 @@ interface Stap {
 
 const VoegStap = () => {
     const router = useRouter();
-    const { handleidingId, handleidingnaam } = useLocalSearchParams<{
+    const { handleidingId, handleidingnaam, dementeGebruikerId, gebruikerId } = useLocalSearchParams<{
         handleidingId: string;
         handleidingnaam: string;
+        dementeGebruikerId: string;
+        gebruikerId: string;
     }>();
 
     const [stappen, setStappen] = useState<Stap[]>([]);
+    const { dementId } = useLocalSearchParams<{ dementId: string }>();
     const [nieuweBeschrijving, setNieuweBeschrijving] = useState("");
 
     const addStap = () => {
@@ -57,7 +60,7 @@ const VoegStap = () => {
 
 
 
-        router.push("/GelinkteUser/handleidingen/alleHandleidingen");
+        router.push(`/GelinkteUser/handleidingen/alleHandleidingen?dementId=${dementId}&gebruikerId=${gebruikerId}&dementeGebruikerId=${dementeGebruikerId}`);
     };
 
     return (
