@@ -1,11 +1,13 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 const HandleidingToevoegen = () => {
     const [handleidingnaam, setHandleidingnaam] = useState("");
+    const { userId } = useLocalSearchParams<{ userId: string }>();  
     const [handleidingbeschrijving, setHandleidingbeschrijving] = useState("");
     const [foto] = useState<string | null>(null);
+    const { dementeGebruikerId } = useLocalSearchParams<{ dementeGebruikerId: string }>();  
 
     const maakHandleiding = () => {
         fetch("http://10.2.160.216:8000/handleiding", {
@@ -14,7 +16,7 @@ const HandleidingToevoegen = () => {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                gebruikersId: 3,
+                gebruikersId: parseInt(dementeGebruikerId),
                 handleidingnaam,
                 handleidingbeschrijving,
                 gepint: 0
@@ -36,7 +38,7 @@ const HandleidingToevoegen = () => {
     return (
         <View style={styles.container}>
             <View style={styles.titleWrapper}>
-                <Text style={styles.title}>Handleiding</Text>
+                <Text style={styles.title}>Handleiding {userId}</Text>
             </View>
 
             <TouchableOpacity style={styles.fotoBox}>

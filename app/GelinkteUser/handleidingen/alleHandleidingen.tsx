@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -12,13 +12,15 @@ type Handleiding = {
 
 function AlleHandleidingen() {
     const [handleidingen, setHandleidingen] = useState<Handleiding[]>([]);
+    const { dementId } = useLocalSearchParams<{ dementId: string }>();
+    const { dementeGebruikerId } = useLocalSearchParams<{ dementeGebruikerId: string }>();
+    const { userId } = useLocalSearchParams<{ userId: string }>();
 
     useEffect(() => {
-        fetch("http://10.2.160.216:8000/handleiding/1")
+        fetch("http://10.2.160.216:8000/handleiding/" + dementId)
             .then(res => res.json())
             .then(data => {
-                console.log(data);
-                setHandleidingen(data);
+                setHandleidingen(Array.isArray(data) ? data : [data])
             })
             .catch(err => console.error("Fetch error:", err));
     }, []);
@@ -44,7 +46,7 @@ function AlleHandleidingen() {
 
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => router.push("/GelinkteUser/handleidingen/handleidingToevoegen")}
+                onPress={() => router.push(`/GelinkteUser/handleidingen/handleidingToevoegen?dementeGebruikerId=${dementeGebruikerId}&gebruikerId=${userId}`)}
             >
                 <Text style={styles.buttonText}>Voeg handleiding toe</Text>
             </TouchableOpacity>
@@ -88,7 +90,7 @@ const styles = StyleSheet.create({
     button: {
         paddingVertical: 12,
         paddingHorizontal: 20,
-        borderRadius: 8,
+        borderRadius: 15,
         alignSelf: 'center',
         marginBottom: 10,
         borderColor: '#301A57',

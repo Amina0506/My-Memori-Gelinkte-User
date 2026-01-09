@@ -37,19 +37,46 @@ const Handleiding = () => {
             .catch(err => console.error(err));
     }, []);
 
+    const deleteHandleiding = async () => {
+        try {
+            if (!id) return;
+
+            const res = await fetch(`http://10.2.160.216:8000/handleiding/${id}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (!res.ok) {
+                const txt = await res.text().catch(() => "");
+                throw new Error(`Verwijderen niet gelukt: ${res.status} ${txt}`);
+            }
+            router.push("/GelinkteUser/handleidingen/alleHandleidingen");
+        } catch (error) {
+            console.error(error);
+            alert("Er is iets misgegaan bij het verwijderen van de handleiding.");
+        }
+    };
+
+
     return (
         <View style={styles.container}>
-            {/**header met titel van de handleiding en 'bewerken' knop */}
+            {/**header met titel van de handleiding en 'bewerken' en 'verwijderen knop */}
             {handleiding && (
                 <View style={styles.titleContainer}>
                     <Text style={styles.title}>{handleidingnaam}</Text>
-
-                    <TouchableOpacity onPress={() => router.push(`/GelinkteUser/handleidingen/handleidingBewerken?id=${id}&handleidingnaam=${handleidingnaam}`)}>
-                        <Text style={styles.bewerkKnop}>Bewerken</Text>
-                    </TouchableOpacity>
                 </View>
             )}
 
+            <View style={styles.buttonContainer}>
+                <TouchableOpacity onPress={() => router.push(`/GelinkteUser/handleidingen/handleidingBewerken?id=${id}&handleidingnaam=${handleidingnaam}`)}>
+                    <Text style={styles.bewerkKnop}>Bewerken</Text>
+                </TouchableOpacity>
+
+                {/**Handleiding verwjideren */}
+                <TouchableOpacity onPress={deleteHandleiding}>
+                    <Text style={[styles.bewerkKnop, { color: "#C62828" }]}>Verwijderen</Text>
+                </TouchableOpacity>
+            </View>
 
             {/**kaarten met stappen */}
             <ScrollView ref={scrollRef} style={styles.scroll} >
@@ -75,7 +102,6 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 28,
         color: '#000',
-        marginBottom: 30,
         marginTop: 30,
         fontWeight: '600',
         alignSelf: 'flex-start',
@@ -117,6 +143,13 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#3A276A',
         fontWeight: '600',
+    },
+    buttonContainer: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        gap: 50, 
+        marginHorizontal: 20,
+        paddingVertical: 30,
     },
 });
 

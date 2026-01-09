@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
@@ -42,7 +42,6 @@ const Handleiding = () => {
             .catch((err) => console.error(err));
     }, [id, baseUrl]);
 
-
     const updateStap = (
         index: number,
         field: keyof Stappen,
@@ -79,7 +78,6 @@ const Handleiding = () => {
                 }),
             });
 
-
             return [...prev, newStap];
         });
     };
@@ -88,11 +86,15 @@ const Handleiding = () => {
         try {
             if (!id) return;
 
-            const stappenResponse = await fetch(`${baseUrl}/handleiding/stap/${stap.handleidingstapId}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(stap),
-            });
+            const stappenResponse = await fetch(
+                `${baseUrl}/handleiding/stap/${stap.handleidingstapId}`,
+                {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(stap),
+                }
+            );
+
             if (!stappenResponse.ok) {
                 const txt = await stappenResponse.text().catch(() => "");
                 throw new Error(`Stappen PATCH mislukt: ${stappenResponse.status} ${txt}`);
@@ -120,7 +122,8 @@ const Handleiding = () => {
                 setHandleiding(updatedHandleiding);
             }
 
-            Alert.alert("Succes", "De wijzigingen zijn opgeslagen!");
+            Alert.alert("Stap opgeslagen", "De stap is succesvol opgeslagen.");
+
         } catch (error) {
             console.error(error);
             Alert.alert("Fout", "Er is iets misgegaan bij het opslaan.");
@@ -152,12 +155,9 @@ const Handleiding = () => {
     return (
         <View style={styles.container}>
             <ScrollView style={styles.scroll}>
-
-
                 <View style={styles.titleContainer}>
                     <Text style={styles.title}>{handleidingnaam}</Text>
                 </View>
-
 
                 {stappen.map((stap, index) => (
                     <View key={`${stap.handleidingstapId}-${index}`} style={styles.stap}>
@@ -171,14 +171,18 @@ const Handleiding = () => {
                                 value={stap.beschrijving}
                                 multiline
                                 onChangeText={(text) => updateStap(index, "beschrijving", text)}
-                                placeholder="Beschrijf de stap..."
                             />
 
                             <TouchableOpacity style={styles.saveButton} onPress={() => saveChanges(stap)}>
                                 <Text style={styles.saveButtonText}>Opslaan</Text>
                             </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.verwijderStap} onPress={() => deleteStap(stap.handleidingstapId)}>
+                            <TouchableOpacity
+
+                                style={styles.verwijderStap}
+
+                                onPress={() => deleteStap(stap.handleidingstapId)}
+                            >
                                 <Text style={styles.verwijderStapText}>Verwijder stap</Text>
                             </TouchableOpacity>
                         </View>
@@ -186,10 +190,20 @@ const Handleiding = () => {
                 ))}
             </ScrollView>
 
-            {/*knop om stap toe te voegen*/}
-            <TouchableOpacity style={styles.addButton} onPress={addStap}>
-                <Text style={styles.addButtonText}>Stap toevoegen</Text>
-            </TouchableOpacity>
+            <View style={styles.buttonRow}>
+                {/*knop om stap toe te voegen*/}
+                <TouchableOpacity style={styles.addButton} onPress={addStap}>
+                    <Text style={styles.addButtonText}>Stap toevoegen</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.addButton}>
+                    <Text
+                        style={styles.addButtonText}
+                        onPress={() => router.push("/GelinkteUser/handleidingen/alleHandleidingen")}
+                    >
+                        Home
+                    </Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 };
@@ -239,14 +253,14 @@ const styles = StyleSheet.create({
     scroll: {
         width: "90%",
         marginBottom: 20,
-        marginTop: 50
+        marginTop: 15,
     },
     titleContainer: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
         width: "100%",
-        paddingHorizontal: 30,
+        paddingHorizontal: 15,
     },
     saveButton: {
         backgroundColor: "#3A276A",
@@ -261,7 +275,7 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 16,
         fontWeight: "600",
-        alignSelf: 'center'
+        alignSelf: "center",
     },
     stapHeader: {
         flexDirection: "row",
@@ -277,7 +291,7 @@ const styles = StyleSheet.create({
         borderRadius: 6,
     },
     verwijderStapText: {
-        alignSelf: 'center',
+        alignSelf: "center",
         fontWeight: "600",
         color: "#fff",
     },
@@ -292,13 +306,20 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 16,
         fontWeight: "600",
+        alignSelf: "center",
     },
     buttonContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
         width: "90%",
         paddingHorizontal: 10,
-    }
+    },
+    buttonRow: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        width: "90%",
+        marginTop: 10,
+    },
 });
 
 export default Handleiding;
