@@ -115,7 +115,7 @@ export default function AfspraakToevoegen() {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.save} onPress={opslaan}>
-          <Text style={{ color: "#fff" }}>Afspraak aanmaken</Text>
+          <Text style={{ color: "#fff" }}>Afspraak toevoegen</Text>
         </TouchableOpacity>
       </View>
     </View>
