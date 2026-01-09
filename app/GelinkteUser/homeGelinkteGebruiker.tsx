@@ -51,13 +51,13 @@ function toInt(v: any): number | null {
 // connected/dement response kan verschillen; we check zowel dementgebruikerId als dementegebruikerId
 function extractDementRowInfo(row: any): {
   dementgebruikerId: number | null;
-  gebruikerId: number | null;
+  dementeGebruikerId: number | null;
   name: string;
 } {
   const dementgebruikerId = toInt(row?.dementgebruikerId ?? row?.dementegebruikerId);
-  const gebruikerId = toInt(row?.gebruikerId ?? row?.gebruikerid ?? row?.tblgebruikers_gebruikerId);
+  const dementeGebruikerId = toInt(row?.dementeGebruikerId ?? row?.dementeGebruikerId ?? row?.tblgebruikers_gebruikerId);
   const name = extractName(row);
-  return { dementgebruikerId, gebruikerId, name };
+  return { dementgebruikerId, dementeGebruikerId, name };
 }
 
 async function safeJson(res: Response) {
@@ -85,6 +85,7 @@ export default function HomeGelinkteGebruiker() {
 
   const [linkedNaam, setLinkedNaam] = useState("...");
   const [dementNaam, setDementNaam] = useState("...");
+    const [dementeGebruikerId, setDementeGebruikerId] = useState("...");
 
   const [counts, setCounts] = useState<Counts>({
     logs: 0,
@@ -146,7 +147,10 @@ export default function HomeGelinkteGebruiker() {
           return;
         }
 
+        console.log(match)
+
         setDementNaam(match.name || "Onbekend");
+        setDementeGebruikerId("" + match.dementeGebruikerId || "Onbekend")
 
         // 3) counts via Dement_ID endpoints
         const [
@@ -219,7 +223,7 @@ export default function HomeGelinkteGebruiker() {
     } as any);
 
   const goDagboek = () => pushTo("/GelinkteUser/dagboek");
-  const goHandleidingen = () => pushTo("/GelinkteUser/handleidingen/alleHandleidingen");
+  const goHandleidingen = () => pushTo(`/GelinkteUser/handleidingen/alleHandleidingen?dementId=${String(session.dementgebruikerid)}&gebruikerId=${String(session.gebruikerid)}&dementeGebruikerId=${dementeGebruikerId}` );
   const goStamboom = () => pushTo("/GelinkteUser/stamboom");
   const goKalender = () => pushTo("/GelinkteUser/kalender");
   const goWieBenIk = () => pushTo("/GelinkteUser/profiel");
