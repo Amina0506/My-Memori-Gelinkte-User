@@ -172,7 +172,7 @@ export default function HomeGelinkteGebruiker() {
           fetch(`${BASE_URL}/user/familieboom/${session.dementgebruikerid}`, {
             headers: { Accept: "application/json" },
           }),
-          // ✅ Handleidingen
+          // Handleidingen
           fetch(`${BASE_URL}/user/handleiding/${session.dementgebruikerid}`, {
             headers: { Accept: "application/json" },
           }),
@@ -226,7 +226,17 @@ export default function HomeGelinkteGebruiker() {
   const goHandleidingen = () => pushTo(`/GelinkteUser/handleidingen/alleHandleidingen?dementId=${String(session.dementgebruikerid)}&gebruikerId=${String(session.gebruikerid)}&dementeGebruikerId=${dementeGebruikerId}` );
   const goStamboom = () => pushTo("/GelinkteUser/stamboom");
   const goKalender = () => pushTo("/GelinkteUser/kalender");
-  const goWieBenIk = () => pushTo("/GelinkteUser/profiel");
+  
+const goWieBenIk = () =>
+  router.push({
+    pathname: "/GelinkteUser/profiel/profiel",
+    params: {
+      gebruikerid: String(session.gebruikerid),
+      dementgebruikerid: String(session.dementgebruikerid),
+      dementeGebruikerId: String(dementeGebruikerId),
+    },
+  } as any);
+  
   const goNoodcontacten = () => pushTo("/GelinkteUser/noodcontacten");
   const goTodo = () => pushTo("/GelinkteUser/todoLijst");
 
@@ -259,7 +269,7 @@ export default function HomeGelinkteGebruiker() {
         <Tile title="Handleidingen" subtitle={`${counts.handleidingen} handleidingen`} onPress={goHandleidingen} />
         <Tile title="Stamboom" subtitle={`${counts.familieBladen} personen`} onPress={goStamboom} />
         <Tile title="Kalender" subtitle={`${counts.afspraken} afspraken`} onPress={goKalender} />
-        <Tile title="Wie ben ik" subtitle="Profiel bekijken" onPress={goWieBenIk} />
+        <Tile title="Wie ben ik" subtitle="Profiel bewerken" onPress={goWieBenIk} />
         <Tile title="Noodcontacten" subtitle="Beheren" onPress={goNoodcontacten} />
         <Tile title="To-do lijst" subtitle={`${counts.todoLists} lijsten`} onPress={goTodo} />
       </View>
