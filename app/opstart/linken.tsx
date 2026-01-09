@@ -164,7 +164,7 @@ export default function Linken() {
         throw new Error(String(msg));
       }
 
-      replaceWithLinkedSession(router, "/GelinkteUser/home", {
+      replaceWithLinkedSession(router, "/opstart/home", {
         gebruikerid: pre.gebruikerid,
         dementgebruikerid: gevondenDementId,
       });
