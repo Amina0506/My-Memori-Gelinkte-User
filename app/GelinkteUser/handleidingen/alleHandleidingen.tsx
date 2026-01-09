@@ -46,7 +46,7 @@ function AlleHandleidingen() {
 
             <TouchableOpacity
                 style={styles.button}
-                onPress={() => router.push(`/GelinkteUser/handleidingen/handleidingToevoegen?dementeGebruikerId=${dementeGebruikerId}&gebruikerId=${userId}`)}
+                onPress={() => router.push(`/GelinkteUser/handleidingen/handleidingToevoegen?dementeGebruikerId=${dementeGebruikerId}&gebruikerId=${userId}&dementId=${dementId}`)}
             >
                 <Text style={styles.buttonText}>Voeg handleiding toe</Text>
             </TouchableOpacity>

@@ -5,6 +5,7 @@ import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "reac
 const HandleidingToevoegen = () => {
     const [handleidingnaam, setHandleidingnaam] = useState("");
     const { userId } = useLocalSearchParams<{ userId: string }>();  
+    const { dementId } = useLocalSearchParams<{ dementId: string }>();  
     const [handleidingbeschrijving, setHandleidingbeschrijving] = useState("");
     const [foto] = useState<string | null>(null);
     const { dementeGebruikerId } = useLocalSearchParams<{ dementeGebruikerId: string }>();  
@@ -24,10 +25,12 @@ const HandleidingToevoegen = () => {
         })
             .then(res => res.json())
             .then(data => {
-                console.log(data)
                 router.push({
                     pathname: "/GelinkteUser/handleidingen/voegStap",
                     params: {
+                        gebruikerId: userId,
+                        dementeGebruikerId: dementeGebruikerId,
+                        dementId: dementId,
                         handleidingId: data.HandleidingId,
                         handleidingnaam: handleidingnaam
                     }
