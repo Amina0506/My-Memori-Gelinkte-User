@@ -76,14 +76,6 @@ async function safeJson(res: Response) {
   }
 }
 
-type Counts = {
-  logs: number;
-  afspraken: number;
-  todoLists: number;
-  familieBladen: number;
-  handleidingen: number;
-};
-
 export default function HomeGelinkteGebruiker() {
   const params = useLocalSearchParams();
   const session = useMemo(() => readLinkedSession(params), [params]);
@@ -95,14 +87,6 @@ export default function HomeGelinkteGebruiker() {
 
  
   const [dementeGebruikerId, setDementeGebruikerId] = useState<number | null>(null);
-
-  const [counts, setCounts] = useState<Counts>({
-    logs: 0,
-    afspraken: 0,
-    todoLists: 0,
-    familieBladen: 0,
-    handleidingen: 0,
-  });
 
   // guard
   useEffect(() => {
@@ -168,13 +152,11 @@ export default function HomeGelinkteGebruiker() {
           fetch(`${BASE_URL}/handleiding/${session.dementgebruikerid}`, { headers: { Accept: "application/json" } }),
         ]);
 
-        const logsData = await safeJson(resLogs);
         const afsprakenData = await safeJson(resAfspraken);
         const todoData = await safeJson(resTodo);
         const boomData = await safeJson(resBoom);
         const handleidingenData = await safeJson(resHandleidingen);
 
-        const logsCount = Array.isArray(logsData) ? logsData.length : 0;
         const afsprakenCount = Array.isArray(afsprakenData) ? afsprakenData.length : 0;
         const todoCount = Array.isArray(todoData) ? todoData.length : 0;
 
@@ -185,13 +167,6 @@ export default function HomeGelinkteGebruiker() {
 
         const handleidingenCount = Array.isArray(handleidingenData) ? handleidingenData.length : 0;
 
-        setCounts({
-          logs: logsCount,
-          afspraken: afsprakenCount,
-          todoLists: todoCount,
-          familieBladen: bladenCount,
-          handleidingen: handleidingenCount,
-        });
       } finally {
         setLoading(false);
       }
@@ -282,10 +257,10 @@ export default function HomeGelinkteGebruiker() {
       <Text style={styles.sectionTitle}>Functies</Text>
 
       <View style={styles.grid}>
-        <Tile title="Dagboek" subtitle={`${counts.logs} logs`} onPress={goDagboek} />
-        <Tile title="Handleidingen" subtitle={`${counts.handleidingen} handleidingen`} onPress={goHandleidingen} />
-        <Tile title="Familieleden" subtitle={`${counts.familieBladen} personen`} onPress={goStamboom} />
-        <Tile title="Kalender" subtitle={`${counts.afspraken} afspraken`} onPress={goKalender} />
+        <Tile title="Dagboek" subtitle={"Herinneringen bekijken"} onPress={goDagboek} />
+        <Tile title="Handleidingen" subtitle={"Handleidingen toevoegen"} onPress={goHandleidingen} />
+        <Tile title="Familieleden" subtitle={"Familieleden toevoegen"}  onPress={goStamboom} />
+        <Tile title="Kalender" subtitle={"Afspraken toevoegen"} onPress={goKalender} />
         <Tile title="Wie ben ik" subtitle="Profiel bewerken" onPress={goWieBenIk} />
       </View>
     </ScrollView>
