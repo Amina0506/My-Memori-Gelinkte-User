@@ -216,8 +216,6 @@ export default function HomeGelinkteGebruiker() {
   const goDagboek = () => pushTo("/GelinkteUser/dagboek");
   const goStamboom = () => pushTo("/GelinkteUser/stamboom");
   const goKalender = () => pushTo("/GelinkteUser/kalender");
-  const goNoodcontacten = () => pushTo("/GelinkteUser/noodcontacten");
-  const goTodo = () => pushTo("/GelinkteUser/todoLijst");
 
   const goWieBenIk = () =>
     router.push({
@@ -289,8 +287,6 @@ export default function HomeGelinkteGebruiker() {
         <Tile title="Stamboom" subtitle={`${counts.familieBladen} personen`} onPress={goStamboom} />
         <Tile title="Kalender" subtitle={`${counts.afspraken} afspraken`} onPress={goKalender} />
         <Tile title="Wie ben ik" subtitle="Profiel bewerken" onPress={goWieBenIk} />
-        <Tile title="Noodcontacten" subtitle="Beheren" onPress={goNoodcontacten} />
-        <Tile title="To-do lijst" subtitle={`${counts.todoLists} lijsten`} onPress={goTodo} />
       </View>
     </ScrollView>
   );
