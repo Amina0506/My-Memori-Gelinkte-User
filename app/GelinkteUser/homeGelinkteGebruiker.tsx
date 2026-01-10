@@ -284,7 +284,7 @@ export default function HomeGelinkteGebruiker() {
       <View style={styles.grid}>
         <Tile title="Dagboek" subtitle={`${counts.logs} logs`} onPress={goDagboek} />
         <Tile title="Handleidingen" subtitle={`${counts.handleidingen} handleidingen`} onPress={goHandleidingen} />
-        <Tile title="Stamboom" subtitle={`${counts.familieBladen} personen`} onPress={goStamboom} />
+        <Tile title="Familieleden" subtitle={`${counts.familieBladen} personen`} onPress={goStamboom} />
         <Tile title="Kalender" subtitle={`${counts.afspraken} afspraken`} onPress={goKalender} />
         <Tile title="Wie ben ik" subtitle="Profiel bewerken" onPress={goWieBenIk} />
       </View>
