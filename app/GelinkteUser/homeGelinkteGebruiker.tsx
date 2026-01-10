@@ -165,7 +165,7 @@ export default function HomeGelinkteGebruiker() {
           fetch(`${BASE_URL}/user/afspraken/${session.dementgebruikerid}`, { headers: { Accept: "application/json" } }),
           fetch(`${BASE_URL}/user/todolist/${session.dementgebruikerid}`, { headers: { Accept: "application/json" } }),
           fetch(`${BASE_URL}/user/familieboom/${session.dementgebruikerid}`, { headers: { Accept: "application/json" } }),
-          fetch(`${BASE_URL}/user/handleiding/${session.dementgebruikerid}`, { headers: { Accept: "application/json" } }),
+          fetch(`${BASE_URL}/handleiding/${session.dementgebruikerid}`, { headers: { Accept: "application/json" } }),
         ]);
 
         const logsData = await safeJson(resLogs);
