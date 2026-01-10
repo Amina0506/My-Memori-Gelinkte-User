@@ -1,44 +1,27 @@
-import { router } from 'expo-router';
-import React from 'react';
-import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Link } from "expo-router";
+import React from "react";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
-export default function EersteOpstart() {
+export default function HomeTab() {
   return (
     <View style={styles.container}>
-      {/* Logo */}
-      <View style={styles.logoContainer}>
-        <Text style={styles.logoIcon}></Text>
+      <Image
+        source={require("../../assets/images/homeMyMemori.png")}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+
+      <View style={styles.textContainer}>
+        <Text style={styles.title}>My Memori</Text>
+        <Text style={styles.subtitle}>Welkom bij My Memori</Text>
       </View>
 
-      {/* Titel */}
-      <Text style={styles.title}>My Memori</Text>
-
-      {/* Terms of service tekst */}
-      <Text style={styles.termsText}>
-        Gelieve de{' '}
-        <Text
-          style={styles.linkText}
-          onPress={() =>
-            Linking.openURL('https://your-terms-of-service-link-here.com')
-          }
-        >
-          terms of service
-        </Text>{' '}
-        te lezen en te accepteren
-      </Text>
-
-      {/* Accepteren en doorgaan als link */}
-      <TouchableOpacity onPress={() => router.push('/opstart/typeAccount')}>
-        <Text style={styles.acceptLink}>Accepteren en doorgaan</Text>
-      </TouchableOpacity>
-
-      {/* Link onder de accepteren */}
-      <Text
-        style={styles.underButtonLink}
-        onPress={() => router.push('/')}
-      >
-        Ga naar de home pagina
-      </Text>
+      {/* RELATIVE href (vanuit app/(tabs) naar app/opstart) */}
+      <Link href="../opstart/typeAccount" asChild>
+        <Pressable style={styles.button}>
+          <Text style={styles.buttonText}>Accepteren en doorgaan</Text>
+        </Pressable>
+      </Link>
     </View>
   );
 }
@@ -46,44 +29,39 @@ export default function EersteOpstart() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
-    paddingHorizontal: 40,
-    paddingTop: 60,
-    alignItems: 'center',
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
   },
-  logoContainer: {
-    marginBottom: 30,
+  logo: {
+    width: 280,
+    height: 280,
+    marginBottom: 36,
   },
-  logoIcon: {
-    fontSize: 130,
-    color: '#998FC7',
+  textContainer: {
+    alignItems: "center",
+    marginBottom: 34,
   },
   title: {
-    fontSize: 32,
-    color: '#301A57',
-    marginBottom: 12,
-    fontWeight: '600',
+    fontSize: 34,
+    fontWeight: "700",
+    color: "#2D1B4E",
+    marginBottom: 6,
   },
-  termsText: {
-    fontSize: 11,
-    color: '#7A7A7A',
-    marginBottom: 40,
-    textAlign: 'center',
+  subtitle: {
+    fontSize: 15,
+    color: "#8A8A8A",
   },
-  linkText: {
-    color: '#6B4EFF',
-    textDecorationLine: 'underline',
+  button: {
+    backgroundColor: "#6A3CBC",
+    paddingVertical: 15,
+    paddingHorizontal: 34,
+    borderRadius: 12,
   },
-  acceptLink: {
-    color: '#6B4EFF',
+  buttonText: {
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 15,
-    textDecorationLine: 'underline',
-  },
-  underButtonLink: {
-    color: '#6B4EFF',
-    fontSize: 14,
-    textDecorationLine: 'underline',
+    fontWeight: "600",
   },
 });

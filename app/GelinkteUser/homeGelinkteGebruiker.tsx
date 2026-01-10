@@ -8,10 +8,10 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 
-// -------- helpers ----------
 function deepFindString(obj: any, keys: string[]): string | null {
   if (obj == null) return null;
 
@@ -48,14 +48,21 @@ function toInt(v: any): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-// connected/dement response kan verschillen; we check zowel dementgebruikerId als dementegebruikerId
+// connected/dement response kan verschillen; we check meerdere veldnamen
 function extractDementRowInfo(row: any): {
   dementgebruikerId: number | null;
   dementeGebruikerId: number | null;
   name: string;
 } {
   const dementgebruikerId = toInt(row?.dementgebruikerId ?? row?.dementegebruikerId);
-  const dementeGebruikerId = toInt(row?.dementeGebruikerId ?? row?.dementeGebruikerId ?? row?.tblgebruikers_gebruikerId);
+
+  const dementeGebruikerId = toInt(
+    row?.dementeGebruikerId ??
+      row?.dementegebruikerId ??
+      row?.tblgebruikers_gebruikerId ??
+      row?.gebruikerId
+  );
+
   const name = extractName(row);
   return { dementgebruikerId, dementeGebruikerId, name };
 }
@@ -85,7 +92,9 @@ export default function HomeGelinkteGebruiker() {
 
   const [linkedNaam, setLinkedNaam] = useState("...");
   const [dementNaam, setDementNaam] = useState("...");
-    const [dementeGebruikerId, setDementeGebruikerId] = useState("...");
+
+ 
+  const [dementeGebruikerId, setDementeGebruikerId] = useState<number | null>(null);
 
   const [counts, setCounts] = useState<Counts>({
     logs: 0,
@@ -147,35 +156,16 @@ export default function HomeGelinkteGebruiker() {
           return;
         }
 
-        console.log(match)
-
         setDementNaam(match.name || "Onbekend");
-        setDementeGebruikerId("" + match.dementeGebruikerId || "Onbekend")
+        setDementeGebruikerId(match.dementeGebruikerId ?? null);
 
         // 3) counts via Dement_ID endpoints
-        const [
-          resLogs,
-          resAfspraken,
-          resTodo,
-          resBoom,
-          resHandleidingen,
-        ] = await Promise.all([
-          fetch(`${BASE_URL}/user/logs/${session.dementgebruikerid}`, {
-            headers: { Accept: "application/json" },
-          }),
-          fetch(`${BASE_URL}/user/afspraken/${session.dementgebruikerid}`, {
-            headers: { Accept: "application/json" },
-          }),
-          fetch(`${BASE_URL}/user/todolist/${session.dementgebruikerid}`, {
-            headers: { Accept: "application/json" },
-          }),
-          fetch(`${BASE_URL}/user/familieboom/${session.dementgebruikerid}`, {
-            headers: { Accept: "application/json" },
-          }),
-          // Handleidingen
-          fetch(`${BASE_URL}/user/handleiding/${session.dementgebruikerid}`, {
-            headers: { Accept: "application/json" },
-          }),
+        const [resLogs, resAfspraken, resTodo, resBoom, resHandleidingen] = await Promise.all([
+          fetch(`${BASE_URL}/user/logs/${session.dementgebruikerid}`, { headers: { Accept: "application/json" } }),
+          fetch(`${BASE_URL}/user/afspraken/${session.dementgebruikerid}`, { headers: { Accept: "application/json" } }),
+          fetch(`${BASE_URL}/user/todolist/${session.dementgebruikerid}`, { headers: { Accept: "application/json" } }),
+          fetch(`${BASE_URL}/user/familieboom/${session.dementgebruikerid}`, { headers: { Accept: "application/json" } }),
+          fetch(`${BASE_URL}/user/handleiding/${session.dementgebruikerid}`, { headers: { Accept: "application/json" } }),
         ]);
 
         const logsData = await safeJson(resLogs);
@@ -212,33 +202,52 @@ export default function HomeGelinkteGebruiker() {
 
   if (!session) return null;
 
-  // routes (pas aan als je binnen folders nog home.tsx gebruikt)
-  const pushTo = (pathname: string) =>
+  // routes helper
+  const pushTo = (pathname: string, extraParams?: Record<string, string>) =>
     router.push({
       pathname,
       params: {
         gebruikerid: String(session.gebruikerid),
         dementgebruikerid: String(session.dementgebruikerid),
+        ...(extraParams ?? {}),
       },
     } as any);
 
   const goDagboek = () => pushTo("/GelinkteUser/dagboek");
-  const goHandleidingen = () => pushTo(`/GelinkteUser/handleidingen/alleHandleidingen?dementId=${String(session.dementgebruikerid)}&gebruikerId=${String(session.gebruikerid)}&dementeGebruikerId=${dementeGebruikerId}` );
   const goStamboom = () => pushTo("/GelinkteUser/stamboom");
   const goKalender = () => pushTo("/GelinkteUser/kalender");
-  
-const goWieBenIk = () =>
-  router.push({
-    pathname: "/GelinkteUser/profiel/profiel",
-    params: {
-      gebruikerid: String(session.gebruikerid),
-      dementgebruikerid: String(session.dementgebruikerid),
-      dementeGebruikerId: String(dementeGebruikerId),
-    },
-  } as any);
-  
   const goNoodcontacten = () => pushTo("/GelinkteUser/noodcontacten");
   const goTodo = () => pushTo("/GelinkteUser/todoLijst");
+
+  const goWieBenIk = () =>
+    router.push({
+      pathname: "/GelinkteUser/profiel/profiel",
+      params: {
+        gebruikerid: String(session.gebruikerid),
+        dementgebruikerid: String(session.dementgebruikerid),
+        dementeGebruikerId: String(dementeGebruikerId ?? ""),
+      },
+    } as any);
+
+ 
+  const goHandleidingen = () =>
+    router.push({
+      pathname: "/GelinkteUser/handleidingen/alleHandleidingen",
+      params: {
+        dementId: String(session.dementgebruikerid),
+        gebruikerId: String(session.gebruikerid),
+        dementeGebruikerId: String(dementeGebruikerId ?? ""),
+        gebruikerid: String(session.gebruikerid),
+        dementgebruikerid: String(session.dementgebruikerid),
+      },
+    } as any);
+
+ 
+  const goLinkedProfiel = () =>
+    router.push({
+      pathname: "/GelinkteUser/profiel",
+      params: { gebruikerid: String(session.gebruikerid) },
+    } as any);
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={{ paddingBottom: 28 }}>
@@ -252,7 +261,17 @@ const goWieBenIk = () =>
         ) : (
           <>
             <Text style={styles.label}>Ingelogd als</Text>
-            <Text style={styles.value}>{linkedNaam}</Text>
+
+            {/* ✅ linkedNaam + profiel knop naast elkaar */}
+            <View style={styles.nameRow}>
+              <Text style={styles.value} numberOfLines={1}>
+                {linkedNaam}
+              </Text>
+
+              <TouchableOpacity style={styles.profileBtn} onPress={goLinkedProfiel} activeOpacity={0.85}>
+                <Text style={styles.profileBtnText}>Profiel</Text>
+              </TouchableOpacity>
+            </View>
 
             <View style={styles.divider} />
 
@@ -273,8 +292,6 @@ const goWieBenIk = () =>
         <Tile title="Noodcontacten" subtitle="Beheren" onPress={goNoodcontacten} />
         <Tile title="To-do lijst" subtitle={`${counts.todoLists} lijsten`} onPress={goTodo} />
       </View>
-
-      
     </ScrollView>
   );
 }
@@ -299,6 +316,7 @@ function Tile({
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#F4F3EF", padding: 18 },
+
   headerCard: {
     backgroundColor: "#fff",
     borderRadius: 18,
@@ -312,6 +330,21 @@ const styles = StyleSheet.create({
   label: { marginTop: 14, color: "#666", fontWeight: "800", fontSize: 12 },
   value: { marginTop: 4, fontSize: 18, fontWeight: "900", color: "#111" },
   divider: { height: 1, backgroundColor: "#E6E3DB", marginVertical: 14 },
+
+ 
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+  },
+  profileBtn: {
+    backgroundColor: "#3B2A63",
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+  },
+  profileBtnText: { color: "#fff", fontWeight: "900", fontSize: 13 },
 
   sectionTitle: { marginTop: 18, marginBottom: 10, fontSize: 16, fontWeight: "900", color: "#111" },
 

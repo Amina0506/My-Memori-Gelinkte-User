@@ -1,5 +1,6 @@
+// app/opstart/linken.tsx
 import { BASE_URL } from "@/app/utils/api";
-import { readPreLinkSession, replaceWithLinkedSession } from "@/app/utils/sessionLinked";
+import { readPreLinkSession } from "@/app/utils/sessionLinked";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -81,7 +82,7 @@ export default function Linken() {
   const params = useLocalSearchParams();
   const pre = useMemo(() => readPreLinkSession(params), [params]);
 
-  const [dementUserId, setDementUserId] = useState(""); 
+  const [dementUserId, setDementUserId] = useState("");
   const [gevondenNaam, setGevondenNaam] = useState<string | null>(null);
   const [gevondenDementId, setGevondenDementId] = useState<number | null>(null);
 
@@ -111,7 +112,11 @@ export default function Linken() {
 
       const raw = await res.text();
       let data: any = null;
-      try { data = raw ? JSON.parse(raw) : null; } catch { data = null; }
+      try {
+        data = raw ? JSON.parse(raw) : null;
+      } catch {
+        data = null;
+      }
 
       if (!res.ok || !data) {
         const msg = data?.message || data?.error || raw || "Geen persoon gevonden.";
@@ -157,17 +162,22 @@ export default function Linken() {
 
       const raw = await res.text();
       let data: any = null;
-      try { data = raw ? JSON.parse(raw) : null; } catch { data = null; }
+      try {
+        data = raw ? JSON.parse(raw) : null;
+      } catch {
+        data = null;
+      }
 
       if (!res.ok) {
         const msg = data?.message || data?.error || raw || "Connectie maken mislukt.";
         throw new Error(String(msg));
       }
 
-      replaceWithLinkedSession(router, "/opstart/home", {
-        gebruikerid: pre.gebruikerid,
-        dementgebruikerid: gevondenDementId,
-      });
+      
+      router.replace({
+        pathname: "/opstart/home",
+        params: { gebruikerid: String(pre.gebruikerid) },
+      } as any);
     } catch (e: any) {
       Alert.alert("Fout", e?.message || "Connectie maken mislukt.");
     } finally {
